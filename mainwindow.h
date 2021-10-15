@@ -14,7 +14,8 @@
 #include <QtCharts>
 #include <QChartView>
 #include <QLineSeries>
-#include <QWidget>
+#include <QKeyEvent>
+#include "helpwindow.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -29,6 +30,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     QDir projectPath;
+    bool isHelpWindowOpen=false;
 
 private slots:
     void on_Next_Button_clicked();
@@ -44,8 +46,20 @@ private slots:
     void on_Solve_Button_clicked();
 
     void on_paraFoam_Button_clicked();
+    void on_HelpWindow_Button_clicked();
+    void on_HelpWindow_closed();
+
+    void on_System_TreeView_doubleClicked(const QModelIndex &index);
+
+    void on_OpenExistFile_Button_clicked();
+
+    void on_LoadPreset_Button_clicked();
+
+    void on_CheckValidity_Button_clicked();
 
 private:
     Ui::MainWindow *ui;
+    HelpWindow *helpWindow;
+    void keyPressEvent(QKeyEvent *event);
 };
 #endif // MAINWINDOW_H
