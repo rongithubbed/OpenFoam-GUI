@@ -37,6 +37,35 @@ void SetTreeView(QDir projectPath, QString pathExtension, QTreeView * specificTr
     }
 }
 
+void MainWindow::on_HelpWindow_Button_clicked()
+{
+    /*
+     * Memory Leak ?
+     */
+    if(!isHelpWindowOpen)
+    {
+        helpWindow = new HelpWindow();
+        connect(helpWindow,SIGNAL(destroyed(QObject*)),this,SLOT(on_HelpWindow_closed()));
+        helpWindow->show();
+        isHelpWindowOpen=true;
+        qCritical() << "HelpWindow created";
+    }
+}
+
+void MainWindow::on_HelpWindow_closed()
+{
+    qCritical() << "HelpWindow destroyed";
+    isHelpWindowOpen=false;
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_F1)
+    {
+        on_HelpWindow_Button_clicked();
+    }
+}
+
 //TAB WIDGET//
 void MainWindow::on_Next_Button_clicked()
 {
@@ -269,37 +298,7 @@ void MainWindow::on_CheckValidity_Button_clicked()
 
 }
 
-
-void MainWindow::on_HelpWindow_Button_clicked()
-{
-    /*
-     * Memory Leak ?
-     */
-    if(!isHelpWindowOpen)
-    {
-        helpWindow = new HelpWindow();
-        connect(helpWindow,SIGNAL(destroyed(QObject*)),this,SLOT(on_HelpWindow_closed()));
-        helpWindow->show();
-        isHelpWindowOpen=true;
-        qCritical() << "HelpWindow created";
-    }
-}
-
-void MainWindow::on_HelpWindow_closed()
-{
-    qCritical() << "HelpWindow destroyed";
-    isHelpWindowOpen=false;
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    if(event->key() == Qt::Key_F1)
-    {
-        on_HelpWindow_Button_clicked();
-    }
-}
-
-
+//SOLVE TAB//
 void MainWindow::on_plotResidual_Button_clicked()
 {
     QFile file(projectPath.path()+"/postprocessing/residuals/0/residuals.dat");
@@ -381,7 +380,7 @@ void MainWindow::on_Solve_Button_clicked()
     QProcess *solveProcess = new QProcess();
     solveProcess->setCurrentReadChannel(QProcess::StandardError);
     //solveProcess->start((ui->comboBox->currentText()),args);
-    solveProcess->start("simpleFoam",args);
+    solveProcess->start("pisoFoam",args);
     //solveProcess->start("simpleFoam > log&",args); //vielleicht sogar mit mkdir logfiles -> mkdir solver,mesh etc
     solveProcess->waitForFinished();
     QString output(solveProcess->readAllStandardOutput());

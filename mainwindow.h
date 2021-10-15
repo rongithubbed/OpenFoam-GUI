@@ -33,29 +33,30 @@ public:
     bool isHelpWindowOpen=false;
 
 private slots:
-    void on_Next_Button_clicked();
-    void on_Previous_Button_clicked();
-    void on_CheckProjectDir_Button_clicked();
-    void on_SetProjectDir_Button_clicked();
-    void on_BlockMesh_Button_clicked();
-    void on_CheckBleDir_Button_clicked();
-    void on_SetBleDir_Button_clicked();
-    void on_plotResidual_Button_clicked();
-    void on_hide_show_clicked();
-
-    void on_Solve_Button_clicked();
-
-    void on_paraFoam_Button_clicked();
+    //GENERAL
+    void on_System_TreeView_doubleClicked(const QModelIndex &index);
     void on_HelpWindow_Button_clicked();
     void on_HelpWindow_closed();
-
-    void on_System_TreeView_doubleClicked(const QModelIndex &index);
-
+    //TAB WIDGET
+    void on_Previous_Button_clicked();
+    void on_Next_Button_clicked();
+    //SETUP TAB
+    void on_CheckProjectDir_Button_clicked();
+    void on_SetProjectDir_Button_clicked();
+    void on_CheckBleDir_Button_clicked();
+    void on_SetBleDir_Button_clicked();
+    //GEOMETRY MESH TAB
+    void on_BlockMesh_Button_clicked();
+    //SOLVER TAB
     void on_OpenExistFile_Button_clicked();
-
-    void on_LoadPreset_Button_clicked();
-
     void on_CheckValidity_Button_clicked();
+    void on_LoadPreset_Button_clicked();
+    //SOLVE TAB
+    void on_plotResidual_Button_clicked();
+    void on_paraFoam_Button_clicked();
+    void on_Solve_Button_clicked();
+    void on_hide_show_clicked();
+
 
 private:
     Ui::MainWindow *ui;
