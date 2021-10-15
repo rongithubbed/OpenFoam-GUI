@@ -40,6 +40,14 @@ private slots:
     void on_HelpWindow_Button_clicked();
     void on_HelpWindow_closed();
 
+    void on_System_TreeView_doubleClicked(const QModelIndex &index);
+
+    void on_OpenExistFile_Button_clicked();
+
+    void on_LoadPreset_Button_clicked();
+
+    void on_CheckValidity_Button_clicked();
+
 private:
     Ui::MainWindow *ui;
     HelpWindow *helpWindow;

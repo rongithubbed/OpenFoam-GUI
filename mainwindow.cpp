@@ -18,6 +18,26 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+//FUNCTIONS//
+//This function initializes a Tree View with the given directory path.
+void SetTreeView(QDir projectPath, QString pathExtension, QTreeView * specificTreeView ){
+    QDir specificPath(projectPath.path()+pathExtension);
+    if(specificPath.exists())
+    {
+        QFileSystemModel *specificModel = new QFileSystemModel;
+        specificModel->setRootPath(specificPath.path());
+        specificTreeView->setModel(specificModel);
+        specificTreeView->setRootIndex(specificModel->index(specificPath.path()));
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setText(pathExtension + " is missing.");
+        msgBox.exec();
+    }
+}
+
+//TAB WIDGET//
 void MainWindow::on_Next_Button_clicked()
 {
     ui->tabWidget->setCurrentIndex(ui->tabWidget->currentIndex()+1);
@@ -28,7 +48,7 @@ void MainWindow::on_Previous_Button_clicked()
     ui->tabWidget->setCurrentIndex(ui->tabWidget->currentIndex()-1);
 }
 
-
+//SETUP TAB//
 void MainWindow::on_CheckProjectDir_Button_clicked()
 {
     QMessageBox msgBox;
@@ -52,26 +72,43 @@ void MainWindow::on_SetProjectDir_Button_clicked()
     {
         projectPath.setPath(path.at(0));
         ui->ProjectDir_LineEdit->setText(projectPath.path());
-        QDir meshPath(projectPath.path()+"/constant");
-        if(meshPath.exists())
-        {
-            QFileSystemModel *meshModel = new QFileSystemModel;
-            meshModel->setRootPath(meshPath.path());
-            ui->PolyMesh_TreeView->setModel(meshModel);
-            ui->PolyMesh_TreeView->setRootIndex(meshModel->index(meshPath.path()));
-        }
-        else
-        {
-            QMessageBox msgBox;
-            msgBox.setText("Your selected path is not a OpenFOAM project");
-            msgBox.exec();
-        }
+        SetTreeView (projectPath, "/constant", ui->PolyMesh_TreeView);
+        SetTreeView (projectPath, "/system", ui->System_TreeView);
     }
-
-
 }
 
+void MainWindow::on_CheckBleDir_Button_clicked()
+{
+    QFile file("Blender_Directory.txt");
+    if(!file.exists())
+    {
+        qCritical() << "Directory not found, set a directory first";
+    }
 
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qCritical() << file.errorString();
+    }
+    QTextStream stream(&file);
+    QMessageBox msgBox;
+    msgBox.setText("Your current Blender Directory is:");
+    msgBox.setInformativeText(stream.readAll());
+    msgBox.exec();
+}
+
+void MainWindow::on_SetBleDir_Button_clicked()
+{
+    QFile file("Blender_Directory.txt");
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qCritical() << file.errorString();
+    }
+    QTextStream stream(&file);
+    stream << ui->BlenderDir_LineEdit->text();
+    file.close();
+}
+
+//GEOMETRY TAB//
 void MainWindow::on_BlockMesh_Button_clicked()
 {
     ui->Mesh_Output->clear();
@@ -98,36 +135,138 @@ void MainWindow::on_BlockMesh_Button_clicked()
     ui->Mesh_Error->append(error);
 }
 
-void MainWindow::on_CheckBleDir_Button_clicked()
+//SOLVER TAB//
+//Opens the selcted file by double clicking it in the Tree View.
+void MainWindow::on_System_TreeView_doubleClicked(const QModelIndex &index)
 {
-    QFile file("Blender_Directory.txt");
-    if(!file.exists())
+    QStringList args;
+    args << projectPath.path() + "/system/" + ui->System_TreeView->model()->data(index.sibling(index.row(),0)).toString();
+    if(QDir(projectPath.path()+"/system").exists(ui->System_TreeView->model()->data(index.sibling(index.row(),0)).toString()))
     {
-        qCritical() << "Directory not found, set a directory first";
+        QProcess *meshProcess = new QProcess();
+        meshProcess->start("pluma",args);
+        meshProcess->waitForFinished();
     }
-
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        qCritical() << file.errorString();
-    }
-    QTextStream stream(&file);
-    QMessageBox msgBox;
-    msgBox.setText("Your current Blender Directory is:");
-    msgBox.setInformativeText(stream.readAll());
-    msgBox.exec();
 }
 
-
-void MainWindow::on_SetBleDir_Button_clicked()
+//Opens the selected file by clicking the "Open Existing File" Button.
+void MainWindow::on_OpenExistFile_Button_clicked()
 {
-    QFile file("Blender_Directory.txt");
-    if(!file.open(QIODevice::WriteOnly))
-    {
-        qCritical() << file.errorString();
+    if(!QDir(projectPath.path()+"/system").exists()){
+        QMessageBox msgBox;
+        msgBox.setText("/system is missing. Please choose a valid project folder first.");
+        msgBox.exec();
+        return;
     }
-    QTextStream stream(&file);
-    stream << ui->BlenderDir_LineEdit->text();
-    file.close();
+    QStringList args;
+    //args << projectPath.path() + "/system/" + ui->System_TreeView->model()->data(ui->System_TreeView->currentIndex()).toString();
+    args << projectPath.path() + "/system/" + ui->System_TreeView->model()->data(ui->System_TreeView->currentIndex().sibling(ui->System_TreeView->currentIndex().row(),0)).toString();
+    if(QDir(projectPath.path()+"/system").exists(ui->System_TreeView->model()->data(ui->System_TreeView->currentIndex().sibling(ui->System_TreeView->currentIndex().row(),0)).toString()))
+    {
+        QProcess *meshProcess = new QProcess();
+        meshProcess->start("pluma",args);
+        meshProcess->waitForFinished();
+    }
+}
+
+//This function generates a solver specific preset for the fvSolution file.
+void MainWindow::on_LoadPreset_Button_clicked()
+{
+    if(!QDir(projectPath.path()+"/system").exists()){
+        QMessageBox msgBox;
+        msgBox.setText("/system is missing. Please choose a valid project folder first.");
+        msgBox.exec();
+    }
+    else if(QDir(projectPath.path()+"/system").exists("fvSolution")){
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Warning", "A fvSolution file allready exists for this project, do you want to overwrite it", QMessageBox::Yes|QMessageBox::Cancel);
+            if (reply == QMessageBox::Yes){
+                QString args;
+                args = projectPath.path() + "/system";
+                if (ui->LoadPreset_ComboBox->currentIndex() == 0){
+                    QProcess *copyS1 = new QProcess();
+                    copyS1->setWorkingDirectory("/home/alejandro/OpenFoam-GUI/Presets");
+                    copyS1->start("cp SimpleFoam " + args);
+                    copyS1->waitForFinished();
+                }
+                else if (ui->LoadPreset_ComboBox->currentIndex() == 1){
+                    QProcess *copyS2 = new QProcess();
+                    copyS2->setWorkingDirectory("/home/alejandro/OpenFoam-GUI/Presets");
+                    copyS2->start("cp PisoFoam " + args);
+                    copyS2->waitForFinished();
+                }
+            }
+    }
+    else{
+        QString args;
+        args = projectPath.path() + "/system";
+        if (ui->LoadPreset_ComboBox->currentIndex() == 0){
+            QProcess *copyS1 = new QProcess();
+            copyS1->setWorkingDirectory("/home/alejandro/OpenFoam-GUI/Presets");
+            copyS1->start("cp SimpleFoam " + args);
+            copyS1->waitForFinished();
+        }
+        else if (ui->LoadPreset_ComboBox->currentIndex() == 1){
+            QProcess *copyS2 = new QProcess();
+            copyS2->setWorkingDirectory("/home/alejandro/OpenFoam-GUI/Presets");
+            copyS2->start("cp PisoFoam " + args);
+            copyS2->waitForFinished();
+        }
+
+    }
+}
+
+//This function verfies if fvSolution has a definition for all the variables contained in /0.
+void MainWindow::on_CheckValidity_Button_clicked()
+{
+    QDir specificPath(projectPath.path()+"/0");
+    if(specificPath.exists()){
+         QStringList var;
+         var << specificPath.entryList();
+         var.removeAll(".");
+         var.removeAll("..");
+         if(!QDir(projectPath.path()+"/system").exists("fvSolution")){
+             QMessageBox msgBox;
+             msgBox.setText("fvSolution is missing.");
+             msgBox.exec();
+             return;
+         }
+         QFile file(projectPath.path()+"/system/fvSolution");
+         if(!file.open(QIODevice::ReadOnly))
+         {
+             qCritical() << file.errorString();
+         }
+         int countVal = 0;
+         for (const auto& i : var){
+             QTextStream in(&file);
+             qDebug() << i;
+             while(!in.atEnd()){
+                 QString line = in.readLine();
+                 line = line.simplified();
+                 line.replace( " ", "" );
+                 qDebug() << line;
+                 if(line == i){
+                     qDebug() << i << "found";
+                     ++countVal;
+                     break;
+                 }
+             }
+             in.seek(0);
+         }
+         if (countVal == var.length()){
+             QMessageBox msgBox;
+             msgBox.setText("Valid");
+             msgBox.exec();
+             return;
+         }
+
+    }
+    else{
+        QMessageBox msgBox;
+        msgBox.setText("/0 is missing. Please choose a valid project folder first.");
+        msgBox.exec();
+    }
+
 }
 
 

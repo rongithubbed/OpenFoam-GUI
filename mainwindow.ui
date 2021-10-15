@@ -30,7 +30,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="Setup_Tab">
        <attribute name="title">
@@ -211,21 +211,32 @@
         <item row="0" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="4,1">
           <item>
-           <widget class="QTreeView" name="treeView_2"/>
+           <widget class="QTreeView" name="System_TreeView"/>
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
-               <widget class="QLabel" name="label_4">
+               <widget class="QLabel" name="Preset_Label">
                 <property name="text">
                  <string>Preset:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="comboBox"/>
+               <widget class="QComboBox" name="LoadPreset_ComboBox">
+                <item>
+                 <property name="text">
+                  <string>SimpleFoam</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>PisoFoam</string>
+                 </property>
+                </item>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="LoadPreset_Button">
@@ -250,14 +261,14 @@
              </layout>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_4">
+             <widget class="QPushButton" name="OpenExistFile_Button">
               <property name="text">
                <string>Open Existing File</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_5">
+             <widget class="QPushButton" name="CheckValidity_Button">
               <property name="text">
                <string>Check Validity / Save</string>
               </property>
