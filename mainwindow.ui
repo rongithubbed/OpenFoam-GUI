@@ -331,7 +331,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="HelpWindow_Button">
         <property name="enabled">
          <bool>true</bool>
         </property>

@@ -6,12 +6,15 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose);
     ui->Mesh_Error->hide();
     ui->MeshError_Label->hide();
 }
 
 MainWindow::~MainWindow()
 {
+    QCoreApplication::quit();
+    delete helpWindow;
     delete ui;
 }
 
@@ -264,5 +267,35 @@ void MainWindow::on_CheckValidity_Button_clicked()
         msgBox.exec();
     }
 
+}
+
+
+void MainWindow::on_HelpWindow_Button_clicked()
+{
+    /*
+     * Memory Leak ?
+     */
+    if(!isHelpWindowOpen)
+    {
+        helpWindow = new HelpWindow();
+        connect(helpWindow,SIGNAL(destroyed(QObject*)),this,SLOT(on_HelpWindow_closed()));
+        helpWindow->show();
+        isHelpWindowOpen=true;
+        qCritical() << "HelpWindow created";
+    }
+}
+
+void MainWindow::on_HelpWindow_closed()
+{
+    qCritical() << "HelpWindow destroyed";
+    isHelpWindowOpen=false;
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_F1)
+    {
+        on_HelpWindow_Button_clicked();
+    }
 }
 

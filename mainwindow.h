@@ -11,6 +11,8 @@
 #include <QDebug>
 #include <QFileSystemModel>
 #include <QFileDialog>
+#include <QKeyEvent>
+#include "helpwindow.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -25,6 +27,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     QDir projectPath;
+    bool isHelpWindowOpen=false;
 
 private slots:
     void on_Next_Button_clicked();
@@ -34,6 +37,8 @@ private slots:
     void on_BlockMesh_Button_clicked();
     void on_CheckBleDir_Button_clicked();
     void on_SetBleDir_Button_clicked();
+    void on_HelpWindow_Button_clicked();
+    void on_HelpWindow_closed();
 
     void on_System_TreeView_doubleClicked(const QModelIndex &index);
 
@@ -45,5 +50,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    HelpWindow *helpWindow;
+    void keyPressEvent(QKeyEvent *event);
 };
 #endif // MAINWINDOW_H
