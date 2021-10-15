@@ -12,6 +12,7 @@ HelpWindow::HelpWindow(QWidget *parent) :
 
     QTabWidget *tWidget = new QTabWidget(this);
     tWidget->setMaximumWidth(200);
+    tWidget->setMinimumWidth(200);
     tWidget->addTab(helpEngine->contentWidget(),"Contents");
     tWidget->addTab(helpEngine->indexWidget(),"Index");
 
