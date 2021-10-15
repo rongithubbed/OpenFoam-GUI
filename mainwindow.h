@@ -11,6 +11,10 @@
 #include <QDebug>
 #include <QFileSystemModel>
 #include <QFileDialog>
+#include <QtCharts>
+#include <QChartView>
+#include <QLineSeries>
+#include <QWidget>
 
 
 QT_BEGIN_NAMESPACE
@@ -34,6 +38,12 @@ private slots:
     void on_BlockMesh_Button_clicked();
     void on_CheckBleDir_Button_clicked();
     void on_SetBleDir_Button_clicked();
+    void on_plotResidual_Button_clicked();
+    void on_hide_show_clicked();
+
+    void on_Solve_Button_clicked();
+
+    void on_paraFoam_Button_clicked();
 
 private:
     Ui::MainWindow *ui;
