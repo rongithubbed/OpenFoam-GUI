@@ -61,6 +61,8 @@ private slots:
 
     void on_OpenMesh_Button_clicked();
 
+    void on_SnappyHexMesh_Button_clicked();
+
 private:
     Ui::MainWindow *ui;
     HelpWindow *helpWindow;

@@ -222,16 +222,28 @@ void MainWindow::on_New_Button_clicked()
 }
 
 //GEOMETRY TAB//
-
 void MainWindow::on_PolyMesh_TreeView_doubleClicked(const QModelIndex &index)
 {
-    QStringList args;
-    args << projectPath.path() + "/constant/" + ui->PolyMesh_TreeView->model()->data(index.sibling(index.row(),0)).toString();
-    if(QDir(projectPath.path()+"/constant").exists(ui->PolyMesh_TreeView->model()->data(index.sibling(index.row(),0)).toString()))
-    {
-        QProcess *openProcess = new QProcess();
-        openProcess->start("pluma",args);
-        openProcess->waitForFinished();
+    QString args;
+    args = projectPath.path() + "/constant/";
+    if(ui->PolyMesh_TreeView->model()->data(index.parent()).toString() == "constant"){
+        if(QDir(args).exists(ui->PolyMesh_TreeView->model()->data(index.sibling(index.row(),0)).toString()))
+        {
+            args.append(ui->PolyMesh_TreeView->model()->data(index.sibling(index.row(),0)).toString());
+            QProcess *openProcess = new QProcess();
+            openProcess->start("pluma " + args);
+            openProcess->waitForFinished();
+        }
+    } else {
+        args.append(ui->PolyMesh_TreeView->model()->data(index.parent()).toString());
+        if(QDir(args).exists(ui->PolyMesh_TreeView->model()->data(index.sibling(index.row(),0)).toString()))
+        {
+            args.append("/");
+            args.append(ui->PolyMesh_TreeView->model()->data(index.sibling(index.row(),0)).toString());
+            QProcess *openProcess = new QProcess();
+            openProcess->start("pluma "+ args);
+            openProcess->waitForFinished();
+        }
     }
 }
 
@@ -243,17 +255,26 @@ void MainWindow::on_OpenMesh_Button_clicked()
         msgBox.exec();
         return;
     }
-    QStringList args;
-    args << projectPath.path() + "/constant/" + ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().sibling(ui->System_TreeView->currentIndex().row(),0)).toString();
-    qDebug() << 1;
-    qDebug() << args;
-    qDebug() << 2;
-    qDebug() << ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().sibling(ui->System_TreeView->currentIndex().row(),0)).toString();
-    if(QDir(projectPath.path()+"/constant").exists(ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().sibling(ui->System_TreeView->currentIndex().row(),0)).toString()))
-    {
-        QProcess *openProcess = new QProcess();
-        openProcess->start("pluma",args);
-        openProcess->waitForFinished();
+    QString args;
+    args = projectPath.path() + "/constant/";
+    if(ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().parent()).toString() == "constant"){
+        if(QDir(args).exists(ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().sibling(ui->PolyMesh_TreeView->currentIndex().row(),0)).toString()))
+        {
+            args.append(ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().sibling(ui->PolyMesh_TreeView->currentIndex().row(),0)).toString());
+            QProcess *openProcess = new QProcess();
+            openProcess->start("pluma " + args);
+            openProcess->waitForFinished();
+        }
+    } else {
+        args.append(ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().parent()).toString());
+        if(QDir(args).exists(ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().sibling(ui->PolyMesh_TreeView->currentIndex().row(),0)).toString()))
+        {
+            args.append("/");
+            args.append(ui->PolyMesh_TreeView->model()->data(ui->PolyMesh_TreeView->currentIndex().sibling(ui->PolyMesh_TreeView->currentIndex().row(),0)).toString());
+            QProcess *openProcess = new QProcess();
+            openProcess->start("pluma "+ args);
+            openProcess->waitForFinished();
+        }
     }
 }
 
@@ -281,6 +302,11 @@ void MainWindow::on_BlockMesh_Button_clicked()
     }
     ui->Mesh_Output->append(output);
     ui->Mesh_Error->append(error);
+}
+
+void MainWindow::on_SnappyHexMesh_Button_clicked()
+{
+
 }
 
 //SOLVER TAB//
