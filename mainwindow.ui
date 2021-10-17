@@ -82,7 +82,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="Setup_Tab">
        <attribute name="title">
@@ -117,9 +117,33 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="NewProject_Button">
+         <widget class="QComboBox" name="New_ComboBox">
+          <item>
+           <property name="text">
+            <string>New Project Folder</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>/system</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>/constant</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>/0</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="New_Button">
           <property name="text">
-           <string>Create new project</string>
+           <string>Create</string>
           </property>
          </widget>
         </item>

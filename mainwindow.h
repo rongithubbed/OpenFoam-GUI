@@ -17,7 +17,6 @@
 #include <QKeyEvent>
 #include "helpwindow.h"
 
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -44,6 +43,7 @@ private slots:
     void on_SetProjectDir_Button_clicked();
     void on_CheckBleDir_Button_clicked();
     void on_SetBleDir_Button_clicked();
+    void on_New_Button_clicked();
     //GEOMETRY MESH TAB
     void on_BlockMesh_Button_clicked();
     //SOLVER TAB
@@ -54,8 +54,18 @@ private slots:
     void on_plotResidual_Button_clicked();
     void on_paraFoam_Button_clicked();
     void on_Solve_Button_clicked();
+<<<<<<< HEAD
     void on_getResiduals_Button_clicked();
     void on_editResiduals_Button_clicked();
+=======
+    void on_hide_show_clicked();
+
+    void on_PolyMesh_TreeView_doubleClicked(const QModelIndex &index);
+
+    void on_OpenMesh_Button_clicked();
+
+    void on_SnappyHexMesh_Button_clicked();
+>>>>>>> 70838c6ba09237b5330a0020c7aca0f5fd0fde20
 
 private:
     Ui::MainWindow *ui;
