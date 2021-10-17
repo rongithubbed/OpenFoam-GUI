@@ -299,15 +299,18 @@ void MainWindow::on_CheckValidity_Button_clicked()
 }
 
 //SOLVE TAB//
+
+//This function uses the generated Residual Data to plot it in the UI
 void MainWindow::on_plotResidual_Button_clicked()
 {
-    QFile file(projectPath.path()+"/postprocessing/residuals/0/residuals.dat");
-    //double n_time;
-
+    //Reading the data from residual.dat
+    QFile file(projectPath.path()+"/postprocessing/Residuals/0/residuals.dat");
+    double n_time = 0;
+    double n_res = 0;
     if(file.exists()){
         if (!file.open(QFile::ReadOnly | QFile::Text)){
             QMessageBox msgBox;
-            msgBox.setText("Could not read Residuals, make sure"+projectPath.path()+"/postprocessing/residuals.dat exists!");
+            msgBox.setText("Could not read Residuals, make sure"+projectPath.path()+"/postprocessing/Residuals/0/residuals.dat exists");
             msgBox.exec();
         }
         QString first_line = file.readLine();
@@ -315,12 +318,6 @@ void MainWindow::on_plotResidual_Button_clicked()
         first_line.remove(0,2);
         QStringList residual_properties = first_line.split(QRegExp("\\s+"), QString::SkipEmptyParts);
         int n_residuals = residual_properties.size();
-        /*QMessageBox msgBox;
-
-        msgBox.setText("number of variables : " + QString::number(n_residuals) + list_first[0]+list_first[1]+list_first[2]+list_first[3]);
-
-        msgBox.exec();*/
-
         QLineSeries* residuals [n_residuals];
         for(int i=1;i<n_residuals;i++){
             residuals[i] = new QLineSeries();
@@ -331,38 +328,55 @@ void MainWindow::on_plotResidual_Button_clicked()
                 QStringList l = line.split(QRegExp("\\s+"), QString::SkipEmptyParts);
                 for(int i=1;i<n_residuals;i++){
                     residuals[i]->append(l[0].toDouble(),l[i].toDouble());
-                    //n_time = l[0].toDouble();
+                    n_time = l[0].toDouble();
+                    if(n_res<l[i].toDouble()){
+                    n_res = l[i].toDouble();
+                    }
                 }
         }
+        //creating a Chart and linking the Data to it
         QChart* chart = new QChart();
-        chart->setTitle("Residuals");
-        chart->legend()->setAlignment(Qt::AlignBottom);
-        chart->legend()->setBrush(QBrush(QColor(128, 128, 128)));
-        chart->legend()->setPen(QPen(QColor(192, 192, 192)));
-        chart->legend()->setGeometry(QRectF(6,6,6,6));
-        chart->legend()->update();
         QPushButton *hide_show[n_residuals];
         for(int i=1;i<n_residuals;i++){
             chart->addSeries(residuals[i]);
             hide_show[i] = new QPushButton("Hide/Show "+residual_properties[i],this);
             ui->Layout_Plot->addWidget(hide_show[i]);
+            //connect(hide_show[i], SIGNAL(clicked(bool)), this,SLOT(on_hide_show_clicked(bool)) ));
         }
-        chart->createDefaultAxes();
+
+        //Plotting the Chart on a ChartView
+        chart->setTitle("Residuals");
+        QValueAxis * axisX = new QValueAxis;
+        QValueAxis * axisY = new QValueAxis;
+        axisX->setRange(0, n_time);
+        axisX->setTickCount(10);
+        axisX->setLabelFormat("%.2f");
+        axisY->setRange(0, n_res);
+        axisX->setTickCount(10);
+        axisY->setLabelFormat("%.2f");
+        axisY->setTitleText("Residual");
+        axisX->setTitleText("Time");
+        chart->addAxis(axisY, Qt::AlignLeft);
+        chart->addAxis(axisX, Qt::AlignBottom);
+        chart->legend()->setAlignment(Qt::AlignBottom);
+        chart->legend()->setBrush(QBrush(QColor(128, 128, 128)));
+        chart->legend()->setPen(QPen(QColor(192, 192, 192)));
+        chart->legend()->setGeometry(QRectF(6,6,6,6));
+        chart->legend()->update();
         ui->Residual_Chart->setChart(chart);
         ui->Residual_Chart->setRenderHint(QPainter::Antialiasing);
     }
     else{
         QMessageBox msgBox;
-        msgBox.setText("Could not read Residuals, make sure"+projectPath.path()+"/postprocessing/residuals.dat exists!");
+        msgBox.setText("Could not read Residuals, make sure"+projectPath.path()+"/postprocessing/Residuals/0/residuals.dat");
         msgBox.exec();
     }
 }
 
-void MainWindow::on_hide_show_clicked(){
-    QMessageBox msgBox;
-    msgBox.setText("lol this works?");
-    msgBox.exec();
-}
+/*void MainWindow::on_hide_show_clicked(int ith){
+
+}*/
+
 void MainWindow::on_Solve_Button_clicked()
 {
     ui->Solver_Output->clear();
@@ -379,9 +393,8 @@ void MainWindow::on_Solve_Button_clicked()
     args << "-case" << projectPath.path();
     QProcess *solveProcess = new QProcess();
     solveProcess->setCurrentReadChannel(QProcess::StandardError);
-    //solveProcess->start((ui->comboBox->currentText()),args);
-    solveProcess->start("pisoFoam",args);
-    //solveProcess->start("simpleFoam > log&",args); //vielleicht sogar mit mkdir logfiles -> mkdir solver,mesh etc
+    solveProcess->start((ui->LoadPreset_ComboBox->currentText()),args);
+    //solveProcess->start("pisoFoam",args);
     solveProcess->waitForFinished();
     QString output(solveProcess->readAllStandardOutput());
     QString error(solveProcess->readAllStandardError());
@@ -389,6 +402,11 @@ void MainWindow::on_Solve_Button_clicked()
     {
         ui->Solver_Error->hide();
         ui->SolverError_Label->hide();
+    }
+    else if(error == "" && output == ""){
+        QMessageBox msgBox;
+        msgBox.setText("There was no Output, the Solver was not applied");
+        msgBox.exec();
     }
     else
     {
@@ -407,5 +425,78 @@ void MainWindow::on_paraFoam_Button_clicked()
     paraFoam->setCurrentReadChannel(QProcess::StandardError);
     paraFoam->start("paraFoam",args);
     paraFoam->waitForFinished();
+}
+
+//this function generates the Residual Data, it also overwrites old residual Data
+void MainWindow::on_getResiduals_Button_clicked()
+{
+    bool inclresidual = false;
+    ui->Solver_Output->clear();
+    ui->Solver_Error->clear();
+    QFile controlDict(projectPath.path()+"/system/controlDict");
+    if(controlDict.exists()){
+    if(controlDict.open(QIODevice::ReadOnly))
+    {
+        while (!controlDict.atEnd())
+        {
+                QString line = controlDict.readLine();
+                QString str = line.simplified();
+                if(str == "#includeFunc residuals")
+                {
+                   inclresidual = true;
+               }
+        }
+    }
+    controlDict.close();
+    if(controlDict.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text) && inclresidual == false)
+    {
+        QTextStream stream(&controlDict);
+        stream << '\n' << "functions \n {\n #includeFunc residuals \n } \n";
+    }
+    controlDict.close();
+    QStringList args;
+    args << "-case" << projectPath.path();
+    QProcess *getResidual = new QProcess();
+    getResidual->setCurrentReadChannel(QProcess::StandardError);
+    getResidual->start("foamGet residuals",args);
+    getResidual->waitForFinished();
+    QString output(getResidual->readAllStandardOutput());
+    QString error(getResidual->readAllStandardError());
+    if(error == "")
+    {
+        ui->Solver_Error->hide();
+        ui->SolverError_Label->hide();
+    }
+    else
+    {
+        ui->Solver_Error->show();
+        ui->SolverError_Label->show();
+    }
+    ui->Solver_Output->append(output);
+    ui->Solver_Error->append(error);
+    }else{
+
+        QMessageBox msgBox;
+        msgBox.setText("Could not generate Residuals, make sure "+projectPath.path()+"/system/controlDict exists.");
+        msgBox.exec();
+    }
+}
+
+//this function enables the User to simply Open the new-generated Residual configurations in the system directory to adjust the properties that should be calculated
+void MainWindow::on_editResiduals_Button_clicked()
+{
+    QFile residuals_config(projectPath.path()+"/system/residuals");
+    if(residuals_config.exists()){
+        QStringList args;
+        args << projectPath.path() + "/system/residuals";
+        QProcess *openresidualsconf = new QProcess();
+        openresidualsconf->start("pluma",args);
+        openresidualsconf->waitForFinished();
+        }
+    else{
+        QMessageBox msgBox;
+        msgBox.setText(projectPath.path()+"/system/residuals does not exist! Make sure the Residuals were generated");
+        msgBox.exec();
+    }
 }
 

@@ -31,7 +31,6 @@ public:
     ~MainWindow();
     QDir projectPath;
     bool isHelpWindowOpen=false;
-
 private slots:
     //GENERAL
     void on_System_TreeView_doubleClicked(const QModelIndex &index);
@@ -55,8 +54,8 @@ private slots:
     void on_plotResidual_Button_clicked();
     void on_paraFoam_Button_clicked();
     void on_Solve_Button_clicked();
-    void on_hide_show_clicked();
-
+    void on_getResiduals_Button_clicked();
+    void on_editResiduals_Button_clicked();
 
 private:
     Ui::MainWindow *ui;
