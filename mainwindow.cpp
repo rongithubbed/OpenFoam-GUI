@@ -517,9 +517,9 @@ void MainWindow::on_plotResidual_Button_clicked()
     }
 }
 
-/*void MainWindow::on_hide_show_clicked(int ith){
+void MainWindow::on_hide_show_clicked(){
 
-}*/
+}
 
 void MainWindow::on_Solve_Button_clicked()
 {
@@ -570,7 +570,6 @@ void MainWindow::on_paraFoam_Button_clicked()
     paraFoam->start("paraFoam",args);
     paraFoam->waitForFinished();
 }
-<<<<<<< HEAD
 
 //this function generates the Residual Data, it also overwrites old residual Data
 void MainWindow::on_getResiduals_Button_clicked()
@@ -644,6 +643,3 @@ void MainWindow::on_editResiduals_Button_clicked()
         msgBox.exec();
     }
 }
-
-=======
->>>>>>> 70838c6ba09237b5330a0020c7aca0f5fd0fde20
